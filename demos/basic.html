@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 	<meta charset="utf-8">
 	<title>Basic Setup</title>
@@ -13,40 +14,58 @@
 		}
 	</style>
 </head>
+
 <body>
 
 	<div id="app"></div>
 
 	<script src="../dist/reef.js"></script>
 	<script>
-		let {store, render} = reef;
+		const { store, component, listeners } = reef;
 
 		// Create a reactive store
-		let data = store({
+		const data = store({
 			heading: 'My Todos',
 			todos: ['Swim', 'Climb', 'Jump', 'Play'],
 			emoji: '👋🎉'
 		});
 
+		function addRandomTodo() {
+			const index = Math.floor(Math.random() * 3)
+			const items = ['Foo', 'Bar', 'Baz']
+			data.todos.push(items[index])
+		}
+
+
 		// Create a template
-		function template () {
-			let {heading, todos, emoji} = data;
+		function template() {
+			const { heading, todos, emoji } = data;
+			const formatItem = (todo, index) => (
+				`<li id="'item_list_'${index}">${todo}</li>`
+			)
 			return `
-				<h1>${heading} ${emoji}</h1>
-				<ul>
-					${todos.map(function (todo) {
-						return `<li id="${todo.toLowerCase().replaceAll(' ', '-')}">${todo}</li>`;
-					}).join('')}
-				</ul>`;
+			<h1>${heading} ${emoji}</h1>
+				<ul>${todos.map(formatItem).join('')}</ul>
+			<button onclick="addRandomTodo()">New random todo</button>
+		`;
 		}
 
 		// Render the template into the UI
-		render('#app', template());
+		component(
+			'#app',
+			template,
+			{
+				storeName: 'reef:store',
+				events: {
+					addRandomTodo,
+				}
+			}
+		);
 
 		// Listen for data updates, and re-render
-		document.addEventListener('reef:store', function () {
-			render('#app', template());
-		});
+		// document.addEventListener('reef:store', function () {
+		// 	render('#app', template());
+		// });
 
 		// After two seconds, add an item to the todo list
 		setTimeout(function () {
@@ -55,4 +74,5 @@
 	</script>
 
 </body>
+
 </html>
